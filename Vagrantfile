@@ -1,107 +1,28 @@
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
+VAGRANTFILE_API_VERSION = "2"
+Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
-$script = <<SCRIPT
-# Update apt and get dependencies
-sudo apt-get update
-sudo DEBIAN_FRONTEND=noninteractive apt-get install -y unzip curl vim \
-    apt-transport-https \
-    ca-certificates \
-    software-properties-common
+  if Vagrant.has_plugin?("vagrant-cachier")
+    config.cache.scope = :box
+  end
 
-# Download Nomad
-NOMAD_VERSION=0.7.0
+  config.vm.provider :virtualbox do |virtualbox, override|
+    override.vm.box = "centos/7"
+  end
 
-echo "Fetching Nomad..."
-cd /tmp/
-curl -sSL https://releases.hashicorp.com/nomad/${NOMAD_VERSION}/nomad_${NOMAD_VERSION}_linux_amd64.zip -o nomad.zip
+  config.vm.provider :lxc do |lxc, override|
+    override.vm.box = "visibilityspots/centos-7.x-minimal"
+  end
 
-echo "Fetching Consul..."
-curl -sSL https://releases.hashicorp.com/consul/1.0.0/consul_1.0.0_linux_amd64.zip > consul.zip
-
-echo "Installing Nomad..."
-unzip nomad.zip
-sudo install nomad /usr/bin/nomad
-
-sudo mkdir -p /etc/nomad.d
-sudo chmod a+w /etc/nomad.d
-
-# Set hostname's IP to made advertisement Just Work
-#sudo sed -i -e "s/.*nomad.*/$(ip route get 1 | awk '{print $NF;exit}') nomad/" /etc/hosts
-
-echo "Installing Docker..."
-if [[ -f /etc/apt/sources.list.d/docker.list ]]; then
-    echo "Docker repository already installed; Skipping"
-else
-    curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
-    sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
-    sudo apt-get update
-fi
-sudo DEBIAN_FRONTEND=noninteractive apt-get install -y docker-ce
-
-# Restart docker to make sure we get the latest version of the daemon if there is an upgrade
-sudo service docker restart
-
-# Make sure we can actually use docker as the vagrant user
-sudo usermod -aG docker vagrant
-
-echo "Installing Consul..."
-unzip /tmp/consul.zip
-sudo install consul /usr/bin/consul
-(
-cat <<-EOF
-	[Unit]
-	Description=consul agent
-	Requires=network-online.target
-	After=network-online.target
-	
-	[Service]
-	Restart=on-failure
-	ExecStart=/usr/bin/consul agent -dev
-	ExecReload=/bin/kill -HUP $MAINPID
-	
-	[Install]
-	WantedBy=multi-user.target
-EOF
-) | sudo tee /etc/systemd/system/consul.service
-sudo systemctl enable consul.service
-sudo systemctl start consul
-
-for bin in cfssl cfssl-certinfo cfssljson
-do
-	echo "Installing $bin..."
-	curl -sSL https://pkg.cfssl.org/R1.2/${bin}_linux-amd64 > /tmp/${bin}
-	sudo install /tmp/${bin} /usr/local/bin/${bin}
-done
-
-echo "Installing autocomplete..."
-nomad -autocomplete-install
-
-SCRIPT
-
-Vagrant.configure(2) do |config|
-  config.vm.box = "bento/ubuntu-16.04" # 16.04 LTS
   config.vm.hostname = "nomad"
-  config.vm.provision "shell", inline: $script, privileged: false
-  config.vm.provision "docker" # Just install it
-  
-  # Expose the nomad api and ui to the host
+  config.vm.synced_folder "nomad", "/opt/nomad", type: "rsync", rsync__chown: false
+  config.vm.synced_folder "prometheus", "/opt/prometheus", type: "rsync", rsync__chown: false
+  config.vm.provision "shell", path: "initialize.sh"
   config.vm.network "forwarded_port", guest: 4646, host: 4646, auto_correct: true
+  config.vm.network "forwarded_port", guest: 9090, host: 9090
 
-  # Increase memory for Parallels Desktop
-  config.vm.provider "parallels" do |p, o|
-    p.memory = "1024"
-  end
-
-  # Increase memory for Virtualbox
-  config.vm.provider "virtualbox" do |vb|
-        vb.memory = "1024"
-  end
-
-  # Increase memory for VMware
-  ["vmware_fusion", "vmware_workstation"].each do |p|
-    config.vm.provider p do |v|
-      v.vmx["memsize"] = "1024"
-    end
+  config.vm.provider "docker" do |d|
+    d.ports = ["9090:9090"]
   end
 end
