@@ -39,7 +39,7 @@ job "node-exporter" {
 
         check {
           type = "http"
-          path = "/targets"
+          path = "/metrics/"
           interval = "10s"
           timeout = "2s"
         }
