@@ -10,13 +10,20 @@ The following steps should make that clear;
 
 bring up the environment by using [vagrant](https://www.vagrantup.com) which will bring up a centos 7 virtualbox machine or lxc container. It will use the intialize.sh bash script to install both nomad and consul and also start a nomad job for our prometheus instance.
 
+The proved working vagrant providers used on an [ArchLinux](https://www.archlinux.org/) system are
+* [vagrant-lxc](https://github.com/fgrehm/vagrant-lxc)
+* [vagrant-libvirt](https://github.com/vagrant-libvirt/)
+* [virtualbox](https://www.virtualbox.org/)
+
 ```bash
     $ vagrant up --provider lxc
+    OR
+    $ vagrant up --provider libvirt
     OR
     $ vagrant up --provider virtualbox
 ```
 
-Once it is finished, you should be able to SSH in and interact with Nomad:
+Once it is finished, you should be able to connect to the vagrant environment through SSH and interact with Nomad:
 
 ```bash
     $ vagrant ssh
