@@ -29,10 +29,17 @@ Once it is finished, you should be able to connect to the vagrant environment th
     $ vagrant ssh
     [vagrant@nomad ~]$ nomad status
     ID          Type     Priority  Status   Submit Date
-    prometheus  service  50        running  2018-06-04T20:12:19Z
+    consul      service  50        running  2019-04-03T14:52:25Z
+    prometheus  service  50        running  2019-04-03T14:52:25Z
 ```
 
-When you browse now to [http://localhost:9090/targets](http://localhost:9090/targets) you should be able to see the prometheus target configuration
+As you can see we have a consul container running next to the prometheus one.
+
+The consul interface is accessible through [http://localhost:8500](http://localhost:8500)
+
+![](img/consul.png)
+
+When you browse to [http://localhost:9090/targets](http://localhost:9090/targets) you should be able to see the prometheus target configuration
 
 ![](img/prometheus-target.png)
 
@@ -128,3 +135,5 @@ When we now stop the node-exporter it should automatically be removed from the t
 ```
 
 ![](img/removed-prometheus-target.png)
+
+All the nomad jobs are sending the application logs from the docker container towards journalctl so you could follow the progress there too.
