@@ -18,4 +18,5 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   config.vm.synced_folder "prometheus", "/opt/prometheus", type: "rsync", rsync__chown: false
   config.vm.provision "shell", path: "initialize.sh"
   config.vm.network "forwarded_port", guest: 9090, host: 9090
+  config.vm.network "forwarded_port", guest: 8500, host: 8500
 end
