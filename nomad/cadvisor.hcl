@@ -19,7 +19,7 @@ job "cadvisor" {
         image = "google/cadvisor:v0.29.0"
         force_pull = true
         volumes = [
-      	  "/:/rootfs:ro",
+          "/:/rootfs:ro",
           "/var/run:/var/run:rw",
           "/sys:/sys:ro",
           "/var/lib/docker/:/var/lib/docker:ro",
@@ -27,6 +27,12 @@ job "cadvisor" {
         ]
         port_map {
           http = 8080
+        }
+        logging {
+          type = "journald"
+          config {
+            tag = "CADVISOR"
+          }
         }
       }
 

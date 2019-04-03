@@ -19,9 +19,22 @@ job "prometheus" {
         image = "prom/prometheus:v2.2.1"
         force_pull = true
         network_mode = "host"
-  	volumes = [
-	    "/opt/prometheus/:/etc/prometheus/"
-	]
+        volumes = [
+          "/opt/prometheus/:/etc/prometheus/"
+        ]
+        args = [
+          "--config.file=/etc/prometheus/prometheus.yml",
+          "--storage.tsdb.path=/prometheus",
+          "--web.console.libraries=/usr/share/prometheus/console_libraries",
+          "--web.console.templates=/usr/share/prometheus/consoles",
+          "--web.enable-admin-api"
+        ]
+        logging {
+          type = "journald"
+          config {
+            tag = "PROMETHEUS"
+          }
+        }
       }
 
       service {

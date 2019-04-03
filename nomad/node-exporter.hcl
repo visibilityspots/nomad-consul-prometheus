@@ -19,12 +19,18 @@ job "node-exporter" {
         image = "prom/node-exporter:v0.16.0"
         force_pull = true
         volumes = [
-	  "/proc:/host/proc",
-	  "/sys:/host/sys",
-	  "/:/rootfs"
+          "/proc:/host/proc",
+          "/sys:/host/sys",
+          "/:/rootfs"
         ]
         port_map {
           http = 9100
+        }
+        logging {
+          type = "journald"
+          config {
+            tag = "NODE-EXPORTER"
+          }
         }
 
       }
