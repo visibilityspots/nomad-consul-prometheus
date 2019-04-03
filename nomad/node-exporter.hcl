@@ -16,7 +16,7 @@ job "node-exporter" {
       driver = "docker"
 
       config {
-        image = "prom/node-exporter:v0.16.0"
+        image = "prom/node-exporter:v0.17.0"
         force_pull = true
         volumes = [
           "/proc:/host/proc",

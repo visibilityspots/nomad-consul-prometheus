@@ -16,7 +16,7 @@ job "prometheus" {
       driver = "docker"
 
       config {
-        image = "prom/prometheus:v2.2.1"
+        image = "prom/prometheus:v2.8.1"
         force_pull = true
         network_mode = "host"
         volumes = [
