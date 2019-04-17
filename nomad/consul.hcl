@@ -14,7 +14,9 @@ job "consul" {
 
     task "consul" {
       driver = "docker"
-
+      env = {
+        CONSUL_BIND_INTERFACE="eth0"
+      }
       config {
         image = "consul:1.4.4"
         force_pull = true
@@ -26,28 +28,26 @@ job "consul" {
           }
         }
       }
-
+      resources {
+        network {
+            port "consul_dns" {
+                static = 8600
+            }
+        }
+      }
       service {
         name = "consul"
-        port = "http"
 
         check {
           type = "http"
           path = "/ui"
           interval = "10s"
           timeout = "2s"
-        }
-
-      }
-
-      resources {
-        cpu    = 50
-        memory = 100
-
-        network {
-          port "http" { static = "8500" }
+          port = "8500"
+          address_mode= "driver"
         }
       }
+
     }
   }
 }

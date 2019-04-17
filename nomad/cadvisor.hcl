@@ -37,6 +37,7 @@ job "cadvisor" {
       }
 
       service {
+        address_mode = "driver"
         name = "cadvisor"
         tags = [
           "metrics"

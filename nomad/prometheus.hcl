@@ -18,7 +18,9 @@ job "prometheus" {
       config {
         image = "prom/prometheus:v2.8.1"
         force_pull = true
-        network_mode = "host"
+        port_map = {
+          http = 9090
+        }
         volumes = [
           "/opt/prometheus/:/etc/prometheus/"
         ]
@@ -39,6 +41,7 @@ job "prometheus" {
 
       service {
         name = "prometheus"
+        address_mode = "driver"
         tags = [
           "metrics"
         ]
@@ -49,6 +52,7 @@ job "prometheus" {
           path = "/targets"
           interval = "10s"
           timeout = "2s"
+          address_mode = "driver"
         }
       }
 
@@ -57,7 +61,9 @@ job "prometheus" {
         memory = 100
 
         network {
-          port "http" { static = "9090" }
+          port "http" {
+            static = "9090"
+          }
         }
       }
     }

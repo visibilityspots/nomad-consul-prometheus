@@ -37,6 +37,7 @@ job "node-exporter" {
 
       service {
         name = "node-exporter"
+        address_mode = "driver"
         tags = [
           "metrics"
         ]
