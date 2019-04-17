@@ -9,6 +9,10 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
   config.vm.box = "centos/7"
 
+  config.vm.provider :virtualbox do |virtualbox, override|
+    virtualbox.customize ["modifyvm", :id, "--memory", 2048]
+  end
+
   config.vm.provider :lxc do |lxc, override|
     override.vm.box = "visibilityspots/centos-7.x-minimal"
   end
